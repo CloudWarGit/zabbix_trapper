@@ -1,22 +1,9 @@
 #! /usr/bin/env python3
 
 import sys, json, re, struct, time, socket
-#from redis_live_client import RedisLiveRequest
-#from api.util import settings
-
-# parser = argparse.ArgumentParser(description='Zabbix Redis status script')
-# parser.add_argument('redis_hostname',nargs='?')
-# parser.add_argument('metric',nargs='?')
-# parser.add_argument('db',default='none',nargs='?')
-# parser.add_argument('-p','--port',dest='redis_port',action='store',help='Redis server port',default=6379,type=int)
-# parser.add_argument('-a','--auth',dest='redis_pass',action='store',help='Redis server pass',default=None)
-# args = parser.parse_args()
 
 zabbix_host = '127.0.0.1'       # Zabbix Server IP
 zabbix_port = 10051             # Zabbix Server Port
-
-# Name of monitored server like it shows in zabbix web ui display
-# redis_hostname = args.redis_hostname if args.redis_hostname else socket.gethostname()
 
 class Metric(object):
     def __init__(self, host, key, value, clock=None):
@@ -85,93 +72,17 @@ def _recv_all(sock, count):
     return buf
 
 def get_data(json_data):
-    # if redis_hostname and args.metric:
-    #     # client = redis.StrictRedis(host=redis_hostname, port=args.redis_port, password=args.redis_pass)
-    #     # server_info = client.info()
-    #     rlr=RedisLiveRequest()
-    #
-    #     if args.metric:
-    #         if args.db and args.db in server_info.keys():
-    #             server_info['key_space_db_keys'] = server_info[args.db]['keys']
-    #             server_info['key_space_db_expires'] = server_info[args.db]['expires']
-    #             server_info['key_space_db_avg_ttl'] = server_info[args.db]['avg_ttl']
-    #
-    #         def llen():
-    #             print(client.llen(args.db))
-    #
-    #         def llensum():
-    #             llensum = 0
-    #             for key in client.scan_iter('*'):
-    #                 if client.type(key) == 'list':
-    #                     llensum += client.llen(key)
-    #             print(llensum)
-    #
-    #         def list_key_space_db():
-    #             if args.db in server_info:
-    #                 print(args.db)
-    #             else:
-    #                 print('database_detect')
-    #
-    #         def default():
-    #             if args.metric in server_info.keys():
-    #                 print(server_info[args.metric])
-    #
-    #         {
-    #             'llen': llen,
-    #             'llenall': llensum,
-    #             'list_key_space_db': list_key_space_db,
-    #         }.get(args.metric, default)()
-    #
-    #     else:
-    #         print('Not selected metric')
-    # else:
-    #     client = redis.StrictRedis(host=redis_hostname, port=args.redis_port, password=args.redis_pass)
-    #     server_info = client.info()
-    #
-    #     a = []
-    #     for i in server_info:
-    #         a.append(Metric(redis_hostname, ('redis[%s]' % i), server_info[i]))
-    #
-    #     llensum = 0
-    #     for key in client.scan_iter('*'):
-    #         print(client.type(key))
-    #         if client.type(key) == 'list':
-    #             llensum += client.llen(key)
-    #     a.append(Metric(redis_hostname, 'redis[llenall]', llensum))
-    #
-    #     Send packet to zabbix
-    #     send_to_zabbix(a, zabbix_host, zabbix_port)
-
-    # redis_servers=settings.get_redis_servers()
-    #
-    # for server in redis_servers:
-    #
-    #     print(redis_servers)
-    #     redis_server=server['server'] + ":" + (str)(server['port'])
-    #     rlr=RedisLiveRequest()
-    #     server_info=rlr.getInfo(redis_server)
-    #     # slowlog=rlr.getSlowlog(redis_sever)
-    #     # commands=rlr.getCommands(redis_sever)
-    #
-    #     a = []
-    #     for i in server_info:
-    #         a.append(Metric(server['server'], ('redis[%s]' % i), server_info[i]))
-    #
-    #     # Send packet to zabbix
-    #     send_to_zabbix(a, zabbix_host, zabbix_port)
-
     a=[]
     result="success"
     try:
         for i in json_data['data']:
             a.append(Metric(json_data['host'], i, json_data['data'][i]))
-    except Exception as e:
-        print(e)
+    except KeyError as e:
         result=str(e)+" is not provided! \n"
-
-    return result
+        return result
 
     send_to_zabbix(a, zabbix_host, zabbix_port)
+    return result
 
 # if __name__=='__main__':
 #     main()
