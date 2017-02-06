@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import sys, json, re, struct, time, socket, argparse
+import sys, json, re, struct, time, socket
 #from redis_live_client import RedisLiveRequest
 #from api.util import settings
 
